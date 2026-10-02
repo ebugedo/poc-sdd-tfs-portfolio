@@ -1,0 +1,40 @@
+# Build outputs
+bin/
+obj/
+
+# Git
+.git/
+.gitignore
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE
+.vs/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test results
+TestResults/
+coverage/
+
+# NuGet
+packages/
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# User secrets
+secrets.json
