@@ -1,3 +1,4 @@
+using Bogus;
 using Portfolio.Domain;
 using Xunit;
 
@@ -58,12 +59,31 @@ public class TestDomainEvent : DomainEvent
     }
 }
 
+// Bogus Faker configurations for test data generation
+public static class TestFakers
+{
+    public static readonly Faker<TestId> TestIdFaker = new Faker<TestId>()
+        .CustomInstantiator(f => new TestId(f.Random.Guid()));
+
+    public static readonly Faker<TestEntity> TestEntityFaker = new Faker<TestEntity>()
+        .CustomInstantiator(f => new TestEntity(TestFakers.TestIdFaker.Generate(), f.Name.JobTitle()));
+
+    public static readonly Faker<TestValueObject> TestValueObjectFaker = new Faker<TestValueObject>()
+        .CustomInstantiator(f => new TestValueObject(f.Name.FirstName(), f.Name.LastName()));
+
+    public static readonly Faker<TestAggregateRoot> TestAggregateRootFaker = new Faker<TestAggregateRoot>()
+        .CustomInstantiator(f => new TestAggregateRoot(TestFakers.TestIdFaker.Generate(), f.Company.CompanyName()));
+
+    public static readonly Faker<TestDomainEvent> TestDomainEventFaker = new Faker<TestDomainEvent>()
+        .CustomInstantiator(f => new TestDomainEvent(f.Company.CompanyName()));
+}
+
 public class EntityTests
 {
     [Fact]
     public void Entities_WithSameId_AreEqual()
     {
-        var id = new TestId(Guid.NewGuid());
+        var id = TestFakers.TestIdFaker.Generate();
         var entity1 = new TestEntity(id, "Entity 1");
         var entity2 = new TestEntity(id, "Entity 2");
 
@@ -74,8 +94,8 @@ public class EntityTests
     [Fact]
     public void Entities_WithDifferentId_AreNotEqual()
     {
-        var entity1 = new TestEntity(new TestId(Guid.NewGuid()), "Entity 1");
-        var entity2 = new TestEntity(new TestId(Guid.NewGuid()), "Entity 2");
+        var entity1 = TestFakers.TestEntityFaker.Generate();
+        var entity2 = TestFakers.TestEntityFaker.Generate();
 
         Assert.NotEqual(entity1, entity2);
         Assert.False(entity1 == entity2);
@@ -88,6 +108,24 @@ public class EntityTests
         var other = new TestEntity(default, "Other");
 
         Assert.Equal(entity, other);
+    }
+
+    [Fact]
+    public void Entity_Faker_GeneratesValidEntities()
+    {
+        var entity = TestFakers.TestEntityFaker.Generate();
+
+        Assert.NotEqual(default, entity.Id.Value);
+        Assert.False(string.IsNullOrWhiteSpace(entity.Name));
+    }
+
+    [Fact]
+    public void Entity_Faker_GeneratesUniqueEntities()
+    {
+        var entities = TestFakers.TestEntityFaker.Generate(100);
+        var uniqueIds = entities.Select(e => e.Id.Value).Distinct().Count();
+
+        Assert.Equal(100, uniqueIds);
     }
 }
 
@@ -122,6 +160,25 @@ public class ValueObjectTests
 
         Assert.Equal(vo1, vo2);
     }
+
+    [Fact]
+    public void ValueObject_Faker_GeneratesValidValueObjects()
+    {
+        var vo = TestFakers.TestValueObjectFaker.Generate();
+
+        Assert.False(string.IsNullOrWhiteSpace(vo.FirstName));
+        Assert.False(string.IsNullOrWhiteSpace(vo.LastName));
+    }
+
+    [Fact]
+    public void ValueObject_Faker_GeneratesDiverseValueObjects()
+    {
+        var vos = TestFakers.TestValueObjectFaker.Generate(100);
+        var uniqueNames = vos.Select(v => (v.FirstName, v.LastName)).Distinct().Count();
+
+        // With 100 generated VOs using random names, we expect high diversity
+        Assert.True(uniqueNames > 50);
+    }
 }
 
 public class AggregateRootTests
@@ -129,7 +186,7 @@ public class AggregateRootTests
     [Fact]
     public void AggregateRoot_CanAddAndClearDomainEvents()
     {
-        var aggregate = new TestAggregateRoot(new TestId(Guid.NewGuid()), "Test Aggregate");
+        var aggregate = new TestAggregateRoot(TestFakers.TestIdFaker.Generate(), "Test Aggregate");
 
         Assert.Empty(aggregate.DomainEvents);
 
@@ -146,13 +203,41 @@ public class AggregateRootTests
     [Fact]
     public void AggregateRoot_DomainEventsAreReadOnly()
     {
-        var aggregate = new TestAggregateRoot(new TestId(Guid.NewGuid()), "Test Aggregate");
+        var aggregate = new TestAggregateRoot(TestFakers.TestIdFaker.Generate(), "Test Aggregate");
         aggregate.AddTestEvent();
 
         var events = aggregate.DomainEvents;
 
         Assert.IsAssignableFrom<IReadOnlyCollection<IDomainEvent>>(events);
         Assert.Equal(1, events.Count);
+    }
+
+    [Fact]
+    public void AggregateRoot_Faker_GeneratesValidAggregates()
+    {
+        var aggregate = TestFakers.TestAggregateRootFaker.Generate();
+
+        Assert.NotEqual(default, aggregate.Id.Value);
+        Assert.False(string.IsNullOrWhiteSpace(aggregate.Name));
+    }
+
+    [Fact]
+    public void AggregateRoot_Faker_GeneratesUniqueAggregates()
+    {
+        var aggregates = TestFakers.TestAggregateRootFaker.Generate(100);
+        var uniqueIds = aggregates.Select(a => a.Id.Value).Distinct().Count();
+
+        Assert.Equal(100, uniqueIds);
+    }
+
+    [Fact]
+    public void AggregateRoot_Faker_DomainEventsWorkCorrectly()
+    {
+        var aggregate = TestFakers.TestAggregateRootFaker.Generate();
+        aggregate.AddTestEvent();
+
+        Assert.Single(aggregate.DomainEvents);
+        Assert.IsType<TestDomainEvent>(aggregate.DomainEvents.First());
     }
 }
 

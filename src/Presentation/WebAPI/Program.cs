@@ -102,3 +102,6 @@ apiV1.MapGet("/test", () => Results.Ok(new { Message = "API v1 is working" }))
      .AllowAnonymous();
 
 app.Run();
+
+// Make Program accessible for integration tests
+public partial class Program { }
