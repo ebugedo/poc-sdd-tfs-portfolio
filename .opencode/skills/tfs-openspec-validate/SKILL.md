@@ -1,11 +1,11 @@
 ---
 name: tfs-openspec-validate
-description: Audits and verifies that C# (.NET / ASP.NET Core API) source code, solution architecture, tech stack dependencies, tasks completion (tasks.md), package security, build status, and test projects comply with OpenSpec specifications and design decisions for a specific target change ($1).
+description: Audits and verifies that C# (.NET / ASP.NET Core API) source code, solution architecture, tech stack dependencies, tasks completion (tasks.md), package security, build status, test projects, and CI/CD pipelines comply with OpenSpec specifications and design decisions for a specific target change ($1).
 ---
 
-# Skill: tfs-openspec-validate - Target Change Audit (.NET / ASP.NET Core API)
+# Skill: tfs-openspec-validate - Target Change Audit (.NET / ASP.NET Core API & CI/CD Pipelines)
 
-Act as an **independent software auditor and .NET / C# QA specialist**. Your objective is to inspect the source code under `src/` and test projects under `test/` against active requirements (`specs/`), architectural/design decisions (`design.md`), and task checklists (`tasks.md`) within the specified change directory (`openspec/changes/$1/`) to prevent spec drift, incomplete tasks, architectural violations, ASP.NET Core structural flaws, stack mismatch, and unrequested code.
+Act as an **independent software auditor and .NET / C# QA specialist**. Your objective is to inspect the source code under `src/`, test projects under `test/`, and CI/CD workflows under `.github/workflows/` against active requirements (`specs/`), architectural/design decisions (`design.md`), and task checklists (`tasks.md`) within the specified change directory (`openspec/changes/$1/`) to prevent spec drift, incomplete tasks, architectural violations, ASP.NET Core structural flaws, stack mismatch, pipeline misconfigurations, and unrequested code.
 
 ## Command & Invocation
 To invoke this skill in OpenCode, use either:
@@ -83,14 +83,19 @@ To invoke this skill in OpenCode, use either:
      - Extract the exact name of each failing test method, project, and suite.
      - Capture the assertion messages, expected vs actual values, and stack traces.
 
-10. **Generate Validation Report**:
+10. **Verify CI/CD Pipelines & GitHub Actions Workflows**:
+    - Inspect `.github/workflows/` to ensure deployment and integration pipelines exist and align with architecture specs.
+    - Confirm that workflows execute required steps (e.g., `dotnet test`, Docker build/push to GHCR, SSH deployment to VPS) as specified in global or change-level specs.
+    - Check that sensitive credentials (SSH keys, GHCR tokens, host IPs) strictly rely on GitHub Secrets (`secrets.*`) and are not hardcoded.
+
+11. **Generate Validation Report**:
     Respond in the chat formatted as follows:
 
     ---
     ### 📋 Specification & Design Verification Report (.NET / ASP.NET Core API)
     **Target Change:** `$1`
 
-    **Overall Status:** [ 🟢 Compliant | 🟡 Incomplete | 🔴 Non-Compliant / Build Failed / Package Vulnerabilities / Tests Failing ]
+    **Overall Status:** [ 🟢 Compliant | 🟡 Incomplete | 🔴 Non-Compliant / Build Failed / Package Vulnerabilities / Tests Failing / Pipeline Misconfigured ]
 
     #### 1. Tasks Completion Check (`openspec/changes/$1/tasks.md`)
     - [x] **Tasks Completion**: Confirmation that all tasks defined in `tasks.md` are completed (`[x]`) and verified in code.
@@ -128,14 +133,22 @@ To invoke this skill in OpenCode, use either:
 
     #### 10. `dotnet test` Results & Failures
     - **Summary**: X passed, Y failed, Z skipped.
-    - **Detailed Failure Output** (If tests, package checks, or build failed, format below for easy copy-paste to OpenCode):
+
+    #### 11. CI/CD & GitHub Actions Pipelines Check
+    - [x] **Workflows Configuration**: Workflows present in `.github/workflows/` and adhere to deployment specs.
+    - [x] **Secrets & Security**: No hardcoded secrets; authentication uses GitHub Secrets.
+    - [ ] **Pipeline Issues**: List any missing workflow files, misconfigurations, or unapproved CI/CD steps.
+
+    #### Detailed Failure Output
+    *(If tests, package checks, build, or pipelines failed, format below for easy copy-paste to OpenCode)*:
 
     ```text
-    ❌ AUDIT / BUILD / TEST FAILURE DETAILS:
+    ❌ AUDIT / BUILD / TEST / PIPELINE FAILURE DETAILS:
 
-    [Category: Package Audit / Build Error / Test Failure]
-    Target: [Project/Suite Name] -> [File/Class/TestMethod]
-    Error Message: [Captured error, package vulnerability, or assertion failure]
+    [Category: Package Audit / Build Error / Test Failure / Pipeline Misconfiguration]
+    Target: [Project/Suite/Workflow File Name] -> [File/Class/TestMethod/Step]
+    Error Message: [Captured error, package vulnerability, assertion failure, or pipeline deviation]
     Stack Trace / Diagnostic Output:
-    [Stack trace or build output]
+    [Stack trace, build output, or workflow snippet]
     ---
+    ```
