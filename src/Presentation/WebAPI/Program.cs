@@ -19,7 +19,7 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
     .WriteTo.Console());
 
 // AutoMapper via Microsoft DI extension
-builder.Services.AddAutoMapper(typeof(ApplicationModule).Assembly);
+builder.Services.AddAutoMapper(cfg => {}, typeof(ApplicationModule).Assembly);
 
 // Autofac
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());

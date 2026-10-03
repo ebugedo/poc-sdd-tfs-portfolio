@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: portfolio_postgres
+    environment:
+      POSTGRES_DB: portfolio_test
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d portfolio_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - portfolio_network
+
+  # Optional: pgAdmin for database management
+  # pgadmin:
+  #   image: dpage/pgadmin4:8
+  #   container_name: portfolio_pgadmin
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@portfolio.local
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #   ports:
+  #     - "5050:80"
+  #   volumes:
+  #     - pgadmin_data:/var/lib/pgadmin
+  #   networks:
+  #     - portfolio_network
+
+volumes:
+  postgres_data:
+  # pgadmin_data:
+
+networks:
+  portfolio_network:
+    driver: bridge
