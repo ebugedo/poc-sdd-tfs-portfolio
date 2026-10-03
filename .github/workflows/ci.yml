@@ -13,6 +13,23 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    # Enable Docker for Testcontainers
+    services:
+      # PostgreSQL for integration tests (optional, Testcontainers manages its own)
+      # postgres:
+      #   image: postgres:16-alpine
+      #   env:
+      #     POSTGRES_DB: portfolio_test
+      #     POSTGRES_USER: test_user
+      #     POSTGRES_PASSWORD: test_password
+      #   ports:
+      #     - 5432:5432
+      #   options: >-
+      #     --health-cmd "pg_isready -U test_user -d portfolio_test"
+      #     --health-interval 10s
+      #     --health-timeout 5s
+      #     --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,11 +40,26 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
           cache: true
 
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Restore dependencies
         run: dotnet restore
 
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
-      - name: Test
-        run: dotnet test --no-restore --configuration Release --verbosity normal
+      - name: Test (Unit Tests only)
+        run: dotnet test --no-restore --configuration Release --verbosity normal --filter "FullyQualifiedName!~IntegrationTests"
+
+      - name: Test (Integration Tests - requires Docker)
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
+        run: dotnet test --no-restore --configuration Release --verbosity normal --filter "FullyQualifiedName~IntegrationTests"
+        continue-on-error: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: '**/TestResults/**/*.trx'

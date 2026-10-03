@@ -3,6 +3,7 @@ using Bogus;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Portfolio.Application.Commands;
 using Portfolio.Application.Mapping;
 using Portfolio.Application.Queries;
@@ -89,10 +90,10 @@ public class MappingTests
 
     public MappingTests()
     {
-        var config = new MapperConfiguration(cfg =>
-        {
-            cfg.AddProfile<TestMappingProfile>();
-        });
+        using var loggerFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(builder => builder.AddConsole());
+        var expression = new AutoMapper.MapperConfigurationExpression();
+        expression.AddProfile<TestMappingProfile>();
+        var config = new AutoMapper.MapperConfiguration(expression, loggerFactory);
         config.AssertConfigurationIsValid();
         _mapper = config.CreateMapper();
     }
