@@ -13,23 +13,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    # Enable Docker for Testcontainers
-    services:
-      # PostgreSQL for integration tests (optional, Testcontainers manages its own)
-      # postgres:
-      #   image: postgres:16-alpine
-      #   env:
-      #     POSTGRES_DB: portfolio_test
-      #     POSTGRES_USER: test_user
-      #     POSTGRES_PASSWORD: test_password
-      #   ports:
-      #     - 5432:5432
-      #   options: >-
-      #     --health-cmd "pg_isready -U test_user -d portfolio_test"
-      #     --health-interval 10s
-      #     --health-timeout 5s
-      #     --health-retries 5
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
