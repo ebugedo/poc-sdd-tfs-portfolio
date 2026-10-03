@@ -1,4 +1,5 @@
 using AutoMapper;
+using Bogus;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -64,6 +65,24 @@ public class TestMappingProfile : MappingProfile
     }
 }
 
+// Bogus Fakers for Application layer test data
+public static class ApplicationTestFakers
+{
+    public static readonly Faker<TestCommand> TestCommandFaker = new Faker<TestCommand>()
+        .RuleFor(c => c.Name, f => f.Lorem.Sentence(3));
+
+    public static readonly Faker<TestQuery> TestQueryFaker = new Faker<TestQuery>()
+        .RuleFor(q => q.Id, f => f.Random.Int(1, 1000));
+
+    public static readonly Faker<TestEntity> TestEntityFaker = new Faker<TestEntity>()
+        .RuleFor(e => e.Id, f => f.Random.Int(1, 10000))
+        .RuleFor(e => e.Name, f => f.Commerce.ProductName());
+
+    public static readonly Faker<TestDto> TestDtoFaker = new Faker<TestDto>()
+        .RuleFor(d => d.Id, f => f.Random.Int(1, 10000))
+        .RuleFor(d => d.Name, f => f.Commerce.ProductName());
+}
+
 public class MappingTests
 {
     private readonly IMapper _mapper;
@@ -81,7 +100,7 @@ public class MappingTests
     [Fact]
     public void Mapping_EntityToDto_Works()
     {
-        var entity = new TestEntity { Id = 1, Name = "Test" };
+        var entity = ApplicationTestFakers.TestEntityFaker.Generate();
         var dto = _mapper.Map<TestDto>(entity);
 
         Assert.Equal(entity.Id, dto.Id);
@@ -91,11 +110,36 @@ public class MappingTests
     [Fact]
     public void Mapping_DtoToEntity_Works()
     {
-        var dto = new TestDto { Id = 2, Name = "Test 2" };
+        var dto = ApplicationTestFakers.TestDtoFaker.Generate();
         var entity = _mapper.Map<TestEntity>(dto);
 
         Assert.Equal(dto.Id, entity.Id);
         Assert.Equal(dto.Name, entity.Name);
+    }
+
+    [Fact]
+    public void Mapping_Faker_GeneratesValidMappings()
+    {
+        var entities = ApplicationTestFakers.TestEntityFaker.Generate(10);
+        var dtos = _mapper.Map<List<TestDto>>(entities);
+
+        Assert.Equal(entities.Count, dtos.Count);
+        for (int i = 0; i < entities.Count; i++)
+        {
+            Assert.Equal(entities[i].Id, dtos[i].Id);
+            Assert.Equal(entities[i].Name, dtos[i].Name);
+        }
+    }
+
+    [Fact]
+    public void Mapping_Bidirectional_RoundTrip()
+    {
+        var entity = ApplicationTestFakers.TestEntityFaker.Generate();
+        var dto = _mapper.Map<TestDto>(entity);
+        var entity2 = _mapper.Map<TestEntity>(dto);
+
+        Assert.Equal(entity.Id, entity2.Id);
+        Assert.Equal(entity.Name, entity2.Name);
     }
 }
 
@@ -106,7 +150,7 @@ public class ValidationTests
     [Fact]
     public void ValidCommand_PassesValidation()
     {
-        var command = new TestCommand { Name = "Valid Name" };
+        var command = ApplicationTestFakers.TestCommandFaker.Generate();
         var result = _validator.Validate(command);
 
         Assert.True(result.IsValid);
@@ -131,6 +175,26 @@ public class ValidationTests
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.PropertyName == "Name");
     }
+
+    [Fact]
+    public void Validator_Faker_GeneratesValidCommands()
+    {
+        var commands = ApplicationTestFakers.TestCommandFaker.Generate(50);
+        foreach (var command in commands)
+        {
+            var result = _validator.Validate(command);
+            Assert.True(result.IsValid, $"Command '{command.Name}' should be valid");
+        }
+    }
+
+    [Fact]
+    public void Validator_Faker_GeneratesDiverseNames()
+    {
+        var commands = ApplicationTestFakers.TestCommandFaker.Generate(100);
+        var uniqueNames = commands.Select(c => c.Name).Distinct().Count();
+
+        Assert.True(uniqueNames > 50);
+    }
 }
 
 public class HandlerPipelineTests
@@ -139,19 +203,32 @@ public class HandlerPipelineTests
     public async Task CommandHandler_ExecutesDirectly()
     {
         var handler = new TestCommandHandler();
-        var command = new TestCommand { Name = "Test Command" };
+        var command = ApplicationTestFakers.TestCommandFaker.Generate();
         var result = await handler.Handle(command, CancellationToken.None);
 
-        Assert.Equal("Command handled: Test Command", result);
+        Assert.Equal($"Command handled: {command.Name}", result);
     }
 
     [Fact]
     public async Task QueryHandler_ExecutesDirectly()
     {
         var handler = new TestQueryHandler();
-        var query = new TestQuery { Id = 42 };
+        var query = ApplicationTestFakers.TestQueryFaker.Generate();
         var result = await handler.Handle(query, CancellationToken.None);
 
-        Assert.Equal("Query handled: 42", result);
+        Assert.Equal($"Query handled: {query.Id}", result);
+    }
+
+    [Fact]
+    public async Task HandlerPipeline_Faker_GeneratesValidCommands()
+    {
+        var handler = new TestCommandHandler();
+        var commands = ApplicationTestFakers.TestCommandFaker.Generate(10);
+
+        foreach (var command in commands)
+        {
+            var result = await handler.Handle(command, CancellationToken.None);
+            Assert.Equal($"Command handled: {command.Name}", result);
+        }
     }
 }
