@@ -1,9 +1,9 @@
 # Build stage
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy csproj files and restore dependencies
-COPY ["Portfolio.sln", "./"]
+COPY ["Portfolio.slnx", "./"]
 COPY ["src/Core/Domain/Portfolio.Domain.csproj", "src/Core/Domain/"]
 COPY ["src/Core/Application/Portfolio.Application.csproj", "src/Core/Application/"]
 COPY ["src/Infrastructure/Persistence/Portfolio.Infrastructure.Persistence.csproj", "src/Infrastructure/Persistence/"]
@@ -17,7 +17,7 @@ WORKDIR "/src/src/Presentation/WebAPI"
 RUN dotnet publish "Portfolio.Presentation.WebAPI.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
 # Create non-root user

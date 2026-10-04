@@ -27,7 +27,7 @@ All sensitive deployment parameters MUST be stored exclusively as GitHub Reposit
 ## 4. Continuous Integration & Continuous Deployment (GitHub Actions)
 - **CI/CD Platform:** GitHub Actions workflows located in `.github/workflows/`.
 - **Deployment Pipeline Workflow Steps:**
-  1. **Build & Test:** Run `dotnet test` on the runner before building the image[cite: 1, 2].
+  1. **Build & Test:** Run `dotnet test` on the runner before building the image.
   2. **Authenticate & Publish:** Log in to `ghcr.io` and push the built Docker image.
   3. **SSH Remote Execution:** Establish an SSH connection to the VPS using `appleboy/ssh-action` (or equivalent standard action) authenticated via `secrets.VPS_HOST`, `secrets.VPS_USERNAME`, and `secrets.VPS_SSH_KEY`.
 

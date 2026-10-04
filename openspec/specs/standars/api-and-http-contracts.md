@@ -14,3 +14,7 @@
 
 ## Response Format
 - All API errors MUST return standard `ProblemDetails` (RFC 7807) format.
+
+## Language
+- All API field names, error messages, and enum values MUST use English.
+- Example: `projectId`, `clientName`, `status`, `createdAt`.
