@@ -1,11 +1,13 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
-using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.IdentityModel.Tokens;
 using Portfolio.Application;
 using Portfolio.Infrastructure.Persistence;
+using Scalar.AspNetCore;
 using Serilog;
 using System.Text;
 
@@ -19,7 +21,7 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
     .WriteTo.Console());
 
 // AutoMapper via Microsoft DI extension
-builder.Services.AddAutoMapper(cfg => {}, typeof(ApplicationModule).Assembly);
+builder.Services.AddAutoMapper(cfg => { }, typeof(ApplicationModule).Assembly);
 
 // Autofac
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
@@ -30,8 +32,8 @@ builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
     containerBuilder.RegisterModule(new Portfolio.Presentation.WebAPI.WebApiModule());
 });
 
-// ProblemDetails (Hellang)
-Hellang.Middleware.ProblemDetails.ProblemDetailsExtensions.AddProblemDetails(builder.Services);
+// Built-in ProblemDetails (ASP.NET Core 8+)
+builder.Services.AddProblemDetails();
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -65,21 +67,26 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Controllers/Minimal APIs
+// OpenAPI + Scalar
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+    {
+        options.Title = "Portfolio API";
+        options.Theme = ScalarTheme.DeepSpace;
+        options.Layout = ScalarLayout.Classic;
+    });
 }
 
 app.UseSerilogRequestLogging();
-app.UseProblemDetails();
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.UseCors("Default");
 app.UseAuthentication();

@@ -32,11 +32,13 @@ To invoke this skill in OpenCode, use:
      
      ## Remediation & Validation Fixes
      ```
-   - Convert all reported issues from `$2` into pending checklist items (`[ ]`)[cite: 1]:
-     - Missing CRUD endpoints, commands, or handlers[cite: 1].
-     - Test failures and test setup/configuration bugs (e.g., missing API versioning headers)[cite: 1].
-     - Dependency/NuGet version conflicts or security vulnerabilities[cite: 1].
-     - Documentation typos and template code cleanup (*drift*)[cite: 1].
+- Convert all reported issues from `$2` into pending checklist items (`[ ]`)[cite: 1]:
+      - Missing CRUD endpoints, commands, or handlers[cite: 1].
+      - Test failures and test setup/configuration bugs (e.g., missing API versioning headers)[cite: 1].
+      - Dependency/NuGet version conflicts or security vulnerabilities[cite: 1].
+      - Documentation typos and template code cleanup (*drift*)[cite: 1].
+      - **Missing Serilog/Structured Logging**: Missing `Serilog.AspNetCore`, `Serilog.RequestLogging` packages; missing `app.UseSerilogRequestLogging()`; missing `builder.Host.UseSerilog()` configuration[cite: 1].
+      - **Missing ProblemDetails**: Missing built-in `builder.Services.AddProblemDetails()` / `app.UseProblemDetails()` instead of Hellang.Middleware.ProblemDetails[cite: 1].
 
 3. **Report Planning Completion**:
    - Confirm to the user that `openspec/changes/$1/tasks.md` has been updated with the new remediation tasks[cite: 1].

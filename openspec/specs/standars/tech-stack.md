@@ -13,6 +13,16 @@
 - **Database:** PostgreSQL.
 - **ORM Provider:** Entity Framework Core using `Npgsql.EntityFrameworkCore.PostgreSQL`.
 
+## Logging & Observability
+- **Structured Logging:** Serilog (`Serilog.AspNetCore`) - Structured, structured logging with sinks for Console, File, Seq, etc.
+- **Request Logging:** `Serilog.RequestLogging` - Automatic HTTP request/response logging.
+- **Enrichment:** Serilog enrichers (FromLogContext, WithMachineName, WithThreadId, WithProcessId).
+
+## API Documentation & Testing
+- **OpenAPI Specification:** Built-in ASP.NET Core OpenAPI support (`Microsoft.AspNetCore.OpenApi`).
+- **API Documentation UI:** Scalar (`Scalar.AspNetCore`) - Modern, fast, and customizable API reference.
+- **API Versioning:** Built-in ASP.NET Core route-based versioning via `MapGroup`.
+
 ## Testing & Quality Assurance
 - **Test Framework:** xUnit.
 - **Mocking Library:** Moq.

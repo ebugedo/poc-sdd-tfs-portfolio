@@ -15,6 +15,7 @@ Act as an **independent software auditor and .NET / C# QA specialist**. Your obj
 - All API field names, error messages, and enum values MUST use English
 - **JSON Serialization**: Newtonsoft.Json (Newtonsoft.Json package) MUST be used for all JSON serialization. System.Text.Json is NOT permitted.
 - **Solution File**: Solution MUST use `.slnx` (XML-based) format. Legacy `.sln` format is NOT permitted.
+- **Structured Logging**: Serilog (`Serilog.AspNetCore`) MUST be used for structured logging. Request logging via `Serilog.RequestLogging` is required. Structured logging sinks (Console, File, Seq) MUST be configured.
 
 ## Command & Invocation
 To invoke this skill in OpenCode, use either:
@@ -53,6 +54,16 @@ To invoke this skill in OpenCode, use either:
      - Verify Dependency Injection registration (services, repositories, options, third-party containers like Autofac) in `Program.cs` or extension methods.
      - Ensure Middlewares (e.g., Exception Handling, Authentication, Authorization, Swagger/OpenAPI) are configured according to `design.md`.
    - **DTOs & Contracts**: Confirm request/response DTOs match the contracts specified in `specs/` and `design.md`.
+
+4b. **Verify Logging & Observability (Serilog)**:
+   - **Serilog Package**: Verify `Serilog.AspNetCore` package is referenced in the WebAPI project.
+   - **Request Logging**: Verify `Serilog.RequestLogging` middleware is registered in `Program.cs` (`app.UseSerilogRequestLogging()`).
+   - **Structured Logging Setup**: Verify `builder.Host.UseSerilog()` is configured with:
+     - ReadFrom.Configuration for appsettings-driven config
+     - ReadFrom.Services for DI integration
+     - Enrich.FromLogContext for contextual enrichment
+     - WriteTo.Console for console sink
+   - **Request Logging Middleware**: Verify `app.UseSerilogRequestLogging()` is called in the pipeline.
 
 5. **Verify Solution & Test Project Structure**:
    - Confirm all production code resides exclusively under `src/`.
@@ -148,6 +159,13 @@ To invoke this skill in OpenCode, use either:
     - [ ] **API Contracts**: JSON properties, query params, headers, error messages use camelCase English.
     - [ ] **Enum Values**: Serialized enum values use English (PascalCase).
     - [ ] **Language Violations**: List any non-English identifiers found in `src/` or `test/`.
+
+    #### 5c. Logging & Observability (Serilog)
+    - [ ] **Serilog Package**: `Serilog.AspNetCore` and `Serilog.RequestLogging` packages referenced in WebAPI project.
+    - [ ] **Request Logging**: `app.UseSerilogRequestLogging()` middleware configured.
+    - [ ] **Structured Logging Setup**: `builder.Host.UseSerilog()` with ReadFrom.Configuration, ReadFrom.Services, Enrich.FromLogContext, WriteTo.Console.
+    - [ ] **Request Logging Middleware**: `app.UseSerilogRequestLogging()` in pipeline.
+    - [ ] **No Fallback Logging**: No direct `ILogger` usage without Serilog integration; no `Console.WriteLine` in production code paths.
 
     #### 6. Satisfied Requirements (`specs/`)
     - [ ] **[Requirement/API Endpoint/C# Method]**: Explanation of the class or endpoint in `src/` fulfilling it.

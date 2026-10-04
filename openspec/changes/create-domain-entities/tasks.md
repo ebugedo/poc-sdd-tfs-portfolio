@@ -59,3 +59,35 @@
 - [x] 8.8 Update NuGet packages to .NET 10 compatible versions (EF Core 10, Npgsql 10, Autofac 9+, AutoMapper 14+, FluentValidation 12+, MediatR 12+, xUnit 2.9+, Test.Sdk 17.14+, Moq 4.20+, Bogus 35+, Testcontainers 4+) - verify `dotnet build` and `dotnet test`
 - [x] 8.9 Update `openspec/specs/standars/tech-stack.md` to reflect .NET 10, Newtonsoft.Json, .slnx standards - verify file updated
 - [x] 8.10 Run full verification: `dotnet build --no-incremental -warnaserror:NU1603,NU1903` and `dotnet test` (unit tests) - verify all pass
+
+## 9. OpenAPI + Scalar API Documentation
+
+- [x] 9.1 Update `openspec/specs/standars/tech-stack.md` to document OpenAPI + Scalar as the API documentation standard - verify file updated
+- [x] 9.2 Update `src/Presentation/WebAPI/Portfolio.Presentation.WebAPI.csproj` - add Scalar.AspNetCore and Microsoft.AspNetCore.OpenApi packages - verify `dotnet build`
+- [x] 9.3 Update `src/Presentation/WebAPI/Program.cs` - implement OpenAPI + Scalar (MapOpenApi, MapScalarApiReference) and use built-in ProblemDetails - verify `dotnet build`
+- [x] 9.4 Remove `Hellang.Middleware.ProblemDetails` package reference from WebAPI csproj - verify `dotnet build`
+- [x] 9.5 Verify `openspec/specs/standars/tech-stack.md` documents OpenAPI + Scalar as the API documentation standard - verify file updated
+- [x] 9.6 Run full verification: `dotnet build --no-incremental` and `dotnet test` (unit tests) - verify all pass
+- [x] 9.7 Update Dockerfile if needed for Scalar (no changes expected) - verify Docker build
+
+## Remediation & Validation Fixes
+
+### Package Vulnerabilities - High Severity CVEs
+
+- [ ] 9.1 Upgrade `System.Security.Cryptography.Xml` transitive dependency in `Portfolio.Infrastructure.Persistence` to address 8 High severity CVEs (GHSA-37gx-xxp4-5rgx, GHSA-w3x6-4m5h-cxqf, GHSA-cvvh-rhrc-wg4q, GHSA-g8r8-53c2-pm3f, GHSA-23rf-6693-g89p, GHSA-8q5v-6pqq-x66h, GHSA-mmjf-rqrv-855v, GHSA-6588-8gv4-xfgh) - **BLOCKED**: Transitive from EF Core 10.0.0, requires upstream EF Core update
+- [ ] 9.2 Upgrade `Microsoft.OpenApi` transitive dependency in `Portfolio.Presentation.WebAPI` and `Portfolio.IntegrationTests` to address High severity vulnerability GHSA-v5pm-xwqc-g5wc - **BLOCKED**: Transitive from OpenAPI dependencies, requires upstream update
+- [x] 9.3 Upgrade `SSH.NET` in `Portfolio.IntegrationTests` from 2024.1.0 to patched version 2026.0.0 to address High severity vulnerabilities GHSA-q939-rpr3-3284, GHSA-mggc-4xg6-vcxf - verify by `dotnet list package --vulnerable --include-transitive`
+
+### Dependency Version Conflicts
+
+- [x] 9.4 Resolve MediatR version conflict: Downgrade `MediatR` to 11.1.0 (compatible with MediatR.Extensions.Microsoft.DependencyInjection 11.1.0) in all affected projects (Application, WebAPI, UnitTests, IntegrationTests) - verify NU1608 warnings resolved
+- [x] 9.5 Verify all MediatR-related packages are version-compatible across all 6 projects - verify `dotnet build` with `-warnaserror:NU1608`
+
+### Environment & Integration Test Setup
+
+- [ ] 9.6 Ensure Docker is available in CI/CD environment for integration tests to run - verify `dotnet test` runs integration tests in CI
+- [ ] 9.7 Verify `PostgreSqlFixture` and `CustomWebApplicationFactory` initialize correctly with Docker available - verify integration tests pass in CI
+
+### Outstanding Task
+
+- [ ] 9.8 Apply migration to local database: `dotnet ef database update --project src/Infrastructure/Persistence --startup-project src/Presentation/WebAPI` - verify tables created in PostgreSQL (requires running PostgreSQL instance)
