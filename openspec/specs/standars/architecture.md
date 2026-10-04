@@ -9,9 +9,9 @@ The primary objective is to isolate core business rules from infrastructure, fra
 ---
 
 ## 1. Solution & Directory Layout
-All source code and test projects must strictly adhere to the following directory structure[cite: 2, 3]:
+All source code and test projects must strictly adhere to the following directory structure:
 
-- **`src/`**: Contains all production source code projects[cite: 2, 3].
+- **`src/`**: Contains all production source code projects.
 - **`test/`**: Contains all test suites (`.UnitTests`, `.IntegrationTests`).
 
 ```text

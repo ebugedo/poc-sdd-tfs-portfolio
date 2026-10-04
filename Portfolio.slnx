@@ -1,25 +1,9 @@
-<Solution>
-  <Folder Name="/src/" />
-  <Folder Name="/src/Core/" />
-  <Folder Name="/src/Core/Application/">
-    <Project Path="src/Core/Application/Portfolio.Application.csproj" />
-  </Folder>
-  <Folder Name="/src/Core/Domain/">
-    <Project Path="src/Core/Domain/Portfolio.Domain.csproj" />
-  </Folder>
-  <Folder Name="/src/Infrastructure/" />
-  <Folder Name="/src/Infrastructure/Persistence/">
-    <Project Path="src/Infrastructure/Persistence/Portfolio.Infrastructure.Persistence.csproj" />
-  </Folder>
-  <Folder Name="/src/Presentation/" />
-  <Folder Name="/src/Presentation/WebAPI/">
-    <Project Path="src/Presentation/WebAPI/Portfolio.Presentation.WebAPI.csproj" />
-  </Folder>
-  <Folder Name="/test/" />
-  <Folder Name="/test/IntegrationTests/">
-    <Project Path="test/IntegrationTests/Portfolio.IntegrationTests.csproj" />
-  </Folder>
-  <Folder Name="/test/UnitTests/">
-    <Project Path="test/UnitTests/Portfolio.UnitTests.csproj" />
-  </Folder>
+<?xml version="1.0" encoding="utf-8"?>
+<Solution Version="1.0">
+  <Project Name="Portfolio.Domain" Path="src/Core/Domain/Portfolio.Domain.csproj" />
+  <Project Name="Portfolio.Application" Path="src/Core/Application/Portfolio.Application.csproj" />
+  <Project Name="Portfolio.Infrastructure.Persistence" Path="src/Infrastructure/Persistence/Portfolio.Infrastructure.Persistence.csproj" />
+  <Project Name="Portfolio.Presentation.WebAPI" Path="src/Presentation/WebAPI/Portfolio.Presentation.WebAPI.csproj" />
+  <Project Name="Portfolio.UnitTests" Path="test/UnitTests/Portfolio.UnitTests.csproj" />
+  <Project Name="Portfolio.IntegrationTests" Path="test/IntegrationTests/Portfolio.IntegrationTests.csproj" />
 </Solution>
